@@ -17,7 +17,8 @@
                 "the very string",
                 "-be",
                 "false",
-                "-bi"
+                "-bi",
+                "positional string"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

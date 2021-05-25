@@ -19,6 +19,10 @@ static inline void checkArgBounds(unsigned int argc, unsigned int i, const char*
 
 Parser::Parser()
 {
+    positionals = std::list<std::pair<TypeName, void*>>();
+
+    position = 0;
+
     flagsMap = std::unordered_map<std::string, std::pair<TypeName, void*>>();
 }
 
@@ -37,9 +41,21 @@ void Parser::addBoolImplicit(std::string&& flagName, bool* store)
 }
 
 
+void Parser::addBoolPositional(bool* store)
+{
+    positionals.push_back(std::make_pair<TypeName, void*>(TypeName::BOOL_POSITIONAL, store));
+}
+
+
 void Parser::addInteger(std::string&& flagName, int* store)
 {
-    flagsMap[flagName] = std::make_pair<TypeName, void*>(TypeName::INT, store);
+    flagsMap[flagName] = std::make_pair<TypeName, void*>(TypeName::INTEGER, store);
+}
+
+
+void Parser::addIntegerPositional(int* store)
+{
+    positionals.push_back(std::make_pair<TypeName, void*>(TypeName::INTEGER_POSITIONAL, store));
 }
 
 
@@ -49,18 +65,43 @@ void Parser::addString(std::string&& flagName, const char** store)
 }
 
 
+void Parser::addStringPositional(const char** store)
+{
+    positionals.push_back(std::make_pair<TypeName, void*>(TypeName::STRING_POSITIONAL, store));
+}
+
+
 void Parser::parse(unsigned int argc, const char** argv) const
 {
     for (unsigned int i = 1; i != argc; i++)
     {
+
+        void* output;
+        TypeName type;
+
         auto it = flagsMap.find(argv[i]);
         if (it == flagsMap.end())
         {
-            std::cerr << "Unrecognized argument: " << argv[i] << std::endl;
-            exit(EXIT_FAILURE);
+            if (argv[i][0] != '-')
+            {
+                auto flag = positionals.begin();
+                std::advance(flag, position);
+                type = flag->first;
+                output = flag->second;
+            }
+            else
+            {
+                std::cerr << "Unrecognized argument: " << argv[i] << std::endl;
+                exit(EXIT_FAILURE);
+            }
+        }
+        else
+        {
+            type = it->second.first;
+            output = it->second.second;
         }
 
-        switch (it->second.first)
+        switch (type)
         {
         case TypeName::BOOL_EXPLICIT:
         {
@@ -70,11 +111,11 @@ void Parser::parse(unsigned int argc, const char** argv) const
 
             if (!strcmp(argv[i], "true"))
             {
-                *(bool*) (it->second.second) = true;
+                *(bool*) output = true;
             }
             else if (!strcmp(argv[i], "false"))
             {
-                *(bool*) (it->second.second) = false;
+                *(bool*) output = false;
             }
             else
             {
@@ -88,11 +129,12 @@ void Parser::parse(unsigned int argc, const char** argv) const
 
         case TypeName::BOOL_IMPLICIT:
         {
-            *(bool*) (it->second.second) = true;
+            *(bool*) output = true;
+
             break;
         }
         
-        case TypeName::INT:
+        case TypeName::INTEGER:
         {
             i ++;
 
@@ -106,7 +148,8 @@ void Parser::parse(unsigned int argc, const char** argv) const
                 exit(EXIT_FAILURE);
             }
 
-            *(int*) (it->second.second) = value;
+            *(int*) output = value;
+
             break;
         }
 
@@ -116,7 +159,49 @@ void Parser::parse(unsigned int argc, const char** argv) const
 
             checkArgBounds(argc, i, argv[i-1]);
 
-            *(const char**) (it->second.second) = argv[i];
+            *(const char**) output = argv[i];
+
+            break;
+        }
+
+        case TypeName::BOOL_POSITIONAL:
+        {
+            if (!strcmp(argv[i], "true"))
+            {
+                *(bool*) output = true;
+            }
+            else if (!strcmp(argv[i], "false"))
+            {
+                *(bool*) output = false;
+            }
+            else
+            {
+                std::cerr << "Invalid boolean value: " << argv[i]
+                    << "for parameter " << argv[i-1] << std::endl;
+                exit(EXIT_FAILURE);
+            }
+
+            break;
+        }
+
+        case TypeName::INTEGER_POSITIONAL:
+        {
+            int value = strtol(argv[i], nullptr, 10);
+            if (value == 0)
+            {
+                std::cerr << "Could not convert to integer value: \"" << argv[i]
+                    << "\" requireg by parameter " << argv[i-1] << std::endl;
+                exit(EXIT_FAILURE);
+            }
+
+            *(int*) output = value;
+
+            break;
+        }
+
+        case TypeName::STRING_POSITIONAL:
+        {
+            *(const char**) output = argv[i];
 
             break;
         }
