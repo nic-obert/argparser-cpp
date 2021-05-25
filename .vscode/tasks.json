@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "BuildTest",
+            "type": "shell",
+            "command": "g++ -g test/test.cpp src/argparse.cpp -I src -o test/test",
+            "problemMatcher": []
+        }
+    ]
+}
