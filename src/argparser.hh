@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 
-namespace argparse
+namespace argparser
 {
 
     // Type of the parameter

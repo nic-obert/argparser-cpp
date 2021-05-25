@@ -1,10 +1,10 @@
-#include "argparse.hh"
+#include "argparser.hh"
 
 #include <string.h>
 #include <iostream>
 
 
-using namespace argparse;
+using namespace argparser;
 
 
 static inline void checkArgBounds(unsigned int argc, unsigned int i, const char* caller)

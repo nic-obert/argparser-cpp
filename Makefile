@@ -1,11 +1,11 @@
 CC=g++
 
-TARGET=target/argparse.a
-HEADER=src/argparse.hh
-OBJECT=target/argparse.o
-SOURCES=src/argparse.cpp
-INSTALL_HEADER=/usr/include/argparse.hh
-INSTALL_ARCHIVE=/usr/lib/libargparse.a
+TARGET=target/argparser.a
+HEADER=src/argparser.hh
+OBJECT=target/argparser.o
+SOURCES=src/argparser.cpp
+INSTALL_HEADER=/usr/include/argparser.hh
+INSTALL_ARCHIVE=/usr/lib/libargparser.a
 
 
 all: target $(TARGET)
