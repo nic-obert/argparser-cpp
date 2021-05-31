@@ -20,7 +20,7 @@ int main(int argc, const char** argv)
     parser.addString("-str", &sflag);
     parser.addBoolExplicit("-be", &beflag);
     parser.addBoolImplicit("-bi", &biflag);
-    parser.addStringPositional(&strPos);
+    parser.addStringPositional(&strPos, true);
 
     parser.parse(argc, argv);
 

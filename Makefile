@@ -23,6 +23,10 @@ $(TARGET): $(OBJECT)
 	ar rcs $@ $^
 
 
+test:
+	g++ test/test.cpp -largparser -o test/test
+
+
 clean:
 	rm -f target/*
 
