@@ -44,7 +44,6 @@ namespace argparser
     public:
 
         // pre-allocates argNumber spaces for the parameters
-        // pre-allocates requiredNumber spaces for required parameters
         Parser(size_t argNumber = 1);
 
         // adds an explicit boolean parameter
