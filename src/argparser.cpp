@@ -10,7 +10,8 @@ static inline void checkArgBounds(unsigned int argc, unsigned int i, const char*
 {
     if (argc == i)
     {
-        std::cerr << "Missing argument for parameter " << caller << std::endl;
+        std::cerr << "Missing argument for parameter " << caller
+            << "\nUse the --help flag to show usage" << std::endl;
         exit(EXIT_FAILURE);
     }
 }
@@ -22,38 +23,40 @@ Parameter::Parameter()
 }
 
 
-Parameter::Parameter(TypeName type, void* store, bool required)
-: type(type), store(store), required(required)
+Parameter::Parameter(TypeName type, void* store, bool required, std::string&& description)
+: type(type), store(store), required(required), description(std::move(description))
 {
 
 }
 
 
-Parser::Parser(size_t argNumber)
+Parser::Parser(size_t argNumber, std::string&& description)
+:   description(std::move(description)),
+    positionals(std::vector<Parameter>()),
+    flagsMap(std::unordered_map<std::string, Parameter>())
 {
-    positionals = std::vector<Parameter>();
     positionals.reserve(argNumber);
-
-    flagsMap = std::unordered_map<std::string, Parameter>();
 }
 
 
-void Parser::addBoolExplicit(std::string&& flagName, bool* store, bool required)
+void Parser::addBoolExplicit(std::string&& flagName, bool* store, bool required, std::string&& description)
 {
     flagsMap[flagName] = Parameter(
                             TypeName::BOOL_EXPLICIT,
                             store,
-                            required
+                            required,
+                            std::move(description)
                         );
 }
 
 
-void Parser::addBoolImplicit(std::string&& flagName, bool* store, bool required)
+void Parser::addBoolImplicit(std::string&& flagName, bool* store, bool required, std::string&& description)
 {
     flagsMap[flagName] = Parameter(
                             TypeName::BOOL_IMPLICIT,
                             store,
-                            required
+                            required,
+                            std::move(description)
                         );
     
     // defaults to false, true if argument is found
@@ -61,53 +64,80 @@ void Parser::addBoolImplicit(std::string&& flagName, bool* store, bool required)
 }
 
 
-void Parser::addBoolPositional(bool* store, bool required)
+void Parser::addBoolPositional(bool* store, bool required, std::string&& description)
 {
     positionals.emplace_back(Parameter(
         TypeName::BOOL_POSITIONAL,
         store,
-        required
+        required,
+        std::move(description)
     ));
 }
 
 
-void Parser::addInteger(std::string&& flagName, int* store, bool required)
+void Parser::addInteger(std::string&& flagName, int* store, bool required, std::string&& description)
 {
     flagsMap[flagName] = Parameter(
                             TypeName::INTEGER,
                             store,
-                            required
+                            required,
+                            std::move(description)
                         );
 }
 
 
-void Parser::addIntegerPositional(int* store, bool required)
+void Parser::addIntegerPositional(int* store, bool required, std::string&& description)
 {
     positionals.emplace_back(Parameter(
         TypeName::INTEGER_POSITIONAL,
         store,
-        required
+        required,
+        std::move(description)
     ));
 }
 
 
-void Parser::addString(std::string&& flagName, const char** store, bool required)
+void Parser::addString(std::string&& flagName, const char** store, bool required, std::string&& description)
 {
     flagsMap[flagName] = Parameter(
                             TypeName::STRING,
                             store,
-                            required
+                            required,
+                            std::move(description)
                         );
 }
 
 
-void Parser::addStringPositional(const char** store, bool required)
+void Parser::addStringPositional(const char** store, bool required, std::string&& description)
 {
     positionals.emplace_back(Parameter(
         TypeName::STRING_POSITIONAL,
         store,
-        required
+        required,
+        std::move(description)
     ));
+}
+
+
+void Parser::printHelp() const
+{
+    std::cout << description << "\n\n";
+
+    std::cout << "Positional arguments:\n";
+
+    for (const Parameter& parameter : positionals)
+    {
+        std::cout << parameter << '\n';
+    }
+
+    std::cout << "\nKeyword arguments:\n";
+
+    for (auto it = flagsMap.cbegin(); it != flagsMap.cend(); it++)
+    {
+        std::cout << it->first << '\t' << it->second << '\n';
+    }
+
+    std::cout << std::endl;
 }
 
 
@@ -118,6 +148,13 @@ void Parser::parse(unsigned int argc, const char** argv)
 
     for (unsigned int i = 1; i != argc; i++)
     {
+
+        // handle eventual help command first and then exit
+        if (!strcmp(argv[i], "--help"))
+        {
+            printHelp();
+            exit(EXIT_FAILURE);
+        }
 
         TypeName type;
         void* output;
@@ -305,5 +342,13 @@ static const char* const typeNameNames[] =
 std::ostream& operator<<(std::ostream& stream, TypeName typeName)
 {
     return stream << typeNameNames[(unsigned char) typeName];
+}
+
+
+std::ostream& operator<<(std::ostream& stream, const Parameter& parameter)
+{
+    return stream << parameter.type << "\t\t"
+        << "required: " << (parameter.required ? "true" : "false") << '\t'
+        << parameter.description;
 }
 

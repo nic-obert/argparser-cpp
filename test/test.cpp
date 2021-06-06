@@ -8,7 +8,7 @@ using namespace argparser;
 int main(int argc, const char** argv)
 {
 
-    Parser parser = Parser();
+    Parser parser = Parser(5, "This is the description");
 
     int iflag = 0;
     const char* sflag = "";
@@ -16,11 +16,11 @@ int main(int argc, const char** argv)
     bool biflag = false;
     const char* strPos = "";
 
-    parser.addInteger("-i", &iflag);
-    parser.addString("-str", &sflag);
-    parser.addBoolExplicit("-be", &beflag);
-    parser.addBoolImplicit("-bi", &biflag);
-    parser.addStringPositional(&strPos, true);
+    parser.addInteger("-i", &iflag, false, "integer argument");
+    parser.addString("-str", &sflag, false, "stirng argument");
+    parser.addBoolExplicit("-be", &beflag, false, "be or not to be");
+    parser.addBoolImplicit("-bi", &biflag, false, "implicit");
+    parser.addStringPositional(&strPos, true, "positional argument");
 
     parser.parse(argc, argv);
 

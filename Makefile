@@ -16,15 +16,15 @@ $(OBJECT): $(SOURCES) $(HEADER)
 
 
 target:
-	mkdir target
+	mkdir $@
 
 
 $(TARGET): $(OBJECT)
 	ar rcs $@ $^
 
 
-test:
-	g++ test/test.cpp -largparser -o test/test
+test: test/test.cpp $(SOURCES)
+	g++ $< -largparser -o test/test
 
 
 clean:
