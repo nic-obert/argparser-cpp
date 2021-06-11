@@ -24,7 +24,7 @@ $(TARGET): $(OBJECT)
 
 
 test: test/test.cpp $(SOURCES)
-	g++ $< -largparser -o test/test
+	g++ $< -largparser -o target/test
 
 
 clean:

@@ -141,6 +141,19 @@ void Parser::printHelp() const
 }
 
 
+static void printArgs(unsigned int argc, const char** argv)
+{
+    std::cout << "Provided arguments: {";
+
+    for (unsigned int i = 0; i != argc; i++)
+    {
+        std::cout << argv[i] << ',';
+    }
+
+    std::cout << '}' << std::endl;
+}
+
+
 void Parser::parse(unsigned int argc, const char** argv)
 {
     // current positional argument
@@ -153,7 +166,7 @@ void Parser::parse(unsigned int argc, const char** argv)
         if (!strcmp(argv[i], "--help"))
         {
             printHelp();
-            exit(EXIT_FAILURE);
+            exit(EXIT_SUCCESS);
         }
 
         TypeName type;
@@ -175,6 +188,7 @@ void Parser::parse(unsigned int argc, const char** argv)
             else
             {
                 std::cerr << "Unrecognized argument: " << argv[i] << std::endl;
+                printArgs(argc, argv);
                 exit(EXIT_FAILURE);
             }
         }
@@ -207,6 +221,7 @@ void Parser::parse(unsigned int argc, const char** argv)
             {
                 std::cerr << "Invalid boolean value: " << argv[i]
                     << "for parameter " << argv[i-1] << std::endl;
+                printArgs(argc, argv);
                 exit(EXIT_FAILURE);
             }
 
@@ -231,6 +246,7 @@ void Parser::parse(unsigned int argc, const char** argv)
             {
                 std::cerr << "Could not convert to integer value: \"" << argv[i]
                     << "\" requireg by parameter " << argv[i-1] << std::endl;
+                printArgs(argc, argv);
                 exit(EXIT_FAILURE);
             }
 
@@ -264,6 +280,7 @@ void Parser::parse(unsigned int argc, const char** argv)
             {
                 std::cerr << "Invalid boolean value: " << argv[i]
                     << "for parameter " << argv[i-1] << std::endl;
+                printArgs(argc, argv);
                 exit(EXIT_FAILURE);
             }
 
@@ -277,6 +294,7 @@ void Parser::parse(unsigned int argc, const char** argv)
             {
                 std::cerr << "Could not convert to integer value: \"" << argv[i]
                     << "\" requireg by parameter " << argv[i-1] << std::endl;
+                printArgs(argc, argv);
                 exit(EXIT_FAILURE);
             }
 
@@ -320,6 +338,7 @@ void Parser::parse(unsigned int argc, const char** argv)
     if (error)
     {
         std::cerr << "Argument parsing failed" << std::endl;
+        printArgs(argc, argv);
         exit(EXIT_FAILURE);
     }
 
